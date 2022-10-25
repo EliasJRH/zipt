@@ -2,14 +2,15 @@
 
 import inquirer from "inquirer";
 import archiver from "archiver";
+import fuzzy from "fuzzy";
+import CheckboxPlusPrompt from "inquirer-checkbox-plus-prompt";
+import chalk from "chalk";
 import fs from "fs";
 
 let dirPath = process.cwd();
 let choices = fs.readdirSync(dirPath);
 
-// TODO:
-// - Create copy of checkbox plus prompt and change around colors and messages,
-// - Replace checkbox prompt with checkbox plus prompt
+inquirer.registerPrompt("checkbox-plus", CheckboxPlusPrompt);
 
 inquirer
   .prompt([
@@ -19,10 +20,25 @@ inquirer
       message: "Enter name of zip file:",
     },
     {
-      type: "checkbox",
+      type: "checkbox-plus",
       name: "filesToZip",
-      message: "Select all files to be added to zip folder:",
-      choices,
+      message: "Select all files to be added to zip folder. Select " + chalk.bold(chalk.cyan("<Space>")) + " to add file and " + chalk.bold(chalk.cyan("type")) + " to search for files",
+      pageSize: 10,
+      highlight: true,
+      searchable: true,
+      source: function (answersSoFar, input) {
+        input = input || "";
+
+        return new Promise(function (resolve) {
+          var fuzzyResult = fuzzy.filter(input, choices);
+
+          var data = fuzzyResult.map(function (element) {
+            return element.original;
+          });
+
+          resolve(data);
+        });
+      },
     },
   ])
   .then((answers) => {
