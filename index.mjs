@@ -8,7 +8,7 @@ import chalk from "chalk";
 import fs from "fs";
 import { exit } from "process";
 
-const globalIgnoredFilesAndDirs = [".git"]
+const globalIgnoredFilesAndDirs = [".git"];
 let recursiveFlag = false;
 let allowFlag = false;
 
@@ -17,12 +17,12 @@ const help = function () {
 
 tzip is an interactive command line application for creating compressed archives
 
-usage:
-  tzip <command>
+Usage: tzip [options]
 
-  -h, --help: Diplays this help message
-  -r: Display individual files in nested subdirectories (default off)
-  -a: Allow files in all directories, included hidden directories and those in .gitignore if one exists (default off)
+Options
+  -h, --help      Diplays this help message
+  -r:             Display individual files in nested subdirectories (default off)
+  -a:             Allow files in all directories, included hidden directories and those in .gitignore if one exists (default off)
   `;
 
   console.log(helpText);
@@ -34,16 +34,14 @@ const getNestedFiles = function (allFiles = [], currentSubDirectory = "") {
   let files = fs.readdirSync(dirPath);
 
   for (let i = 0; i < files.length; ++i) {
-
     let statSync = fs.lstatSync(currentSubDirectory + files[i]);
     if (statSync.isFile()) {
-      if (!allowFlag){
-        if (globalIgnoredFilesAndDirs.some(entry => entry.test(files[i]))){
+      if (!allowFlag) {
+        if (globalIgnoredFilesAndDirs.some((entry) => entry.test(files[i]))) {
           continue;
         }
       }
       allFiles.push(currentSubDirectory + files[i]);
-
     } else if (statSync.isDirectory()) {
       if (!allowFlag) {
         if (globalIgnoredFilesAndDirs.includes(files[i])) {
@@ -90,6 +88,20 @@ const main = function () {
         message: "Enter name of zip file:",
       },
       {
+        type: "list",
+        name: "zipFormat",
+        message: "Select compression file type",
+        choices: zipFormats,
+      },
+      {
+        type: "confirm",
+        name: "fileOverwriteConfirm",
+        message: `That file already exists, do you want to overwrite it?`,
+        when(answers) {
+          return fs.existsSync(`${answers.zipName}.${answers.zipFormat}`);
+        },
+      },
+      {
         type: "checkbox-plus",
         name: "filesToZip",
         message:
@@ -114,16 +126,21 @@ const main = function () {
             resolve(data);
           });
         },
-      },
-      {
-        type: "list",
-        name: "zipFormat",
-        message: "Select compression file type",
-        choices: zipFormats,
+        when(answers) {
+          return (
+            answers.fileOverwriteConfirm === undefined ||
+            answers.fileOverwriteConfirm
+          );
+        },
       },
     ])
     .then((answers) => {
-      createZip(answers.zipName, answers.filesToZip, answers.zipFormat);
+      if (
+        answers.fileOverwriteConfirm === undefined ||
+        answers.fileOverwriteConfirm
+      ) {
+        createZip(answers.zipName, answers.filesToZip, answers.zipFormat);
+      }
     });
 
   function createZip(zipName, items, zipFormat) {
