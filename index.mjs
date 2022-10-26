@@ -10,6 +10,8 @@ import fs from "fs";
 let dirPath = process.cwd();
 let choices = fs.readdirSync(dirPath);
 
+const zipFormats = ["zip", "tar"]
+
 inquirer.registerPrompt("checkbox-plus", CheckboxPlusPrompt);
 
 inquirer
@@ -40,17 +42,24 @@ inquirer
         });
       },
     },
+    {
+      type: "list",
+      name: "zipFormat",
+      message: "Select compression file type",
+      choices: zipFormats
+    }
   ])
   .then((answers) => {
-    createZip(answers.zipName, answers.filesToZip);
+    createZip(answers.zipName, answers.filesToZip, answers.zipFormat);
   });
 
-function createZip(zipName, items) {
+function createZip(zipName, items, zipFormat) {
+  console.log(zipFormat)
   // The following few lines of code is boilerplate archiver code
 
   // create a file to stream archive data to.
-  const output = fs.createWriteStream(`${dirPath}/${zipName}.zip`);
-  const archive = archiver("zip", {
+  const output = fs.createWriteStream(`${dirPath}/${zipName}.${zipFormat}`);
+  const archive = archiver(zipFormat, {
     zlib: { level: 9 }, // Sets the compression level.
   });
 
