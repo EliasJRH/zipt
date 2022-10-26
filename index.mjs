@@ -8,7 +8,7 @@ import chalk from "chalk";
 import fs from "fs";
 import { exit } from "process";
 
-const globalIgnoredDirectories = [".git"];
+const globalIgnoredFilesAndDirs = [".git"]
 let recursiveFlag = false;
 let allowFlag = false;
 
@@ -32,13 +32,21 @@ const getNestedFiles = function (allFiles = [], currentSubDirectory = "") {
   let dirPath =
     process.cwd() + (currentSubDirectory ? "/" : "") + currentSubDirectory;
   let files = fs.readdirSync(dirPath);
+
   for (let i = 0; i < files.length; ++i) {
+
     let statSync = fs.lstatSync(currentSubDirectory + files[i]);
     if (statSync.isFile()) {
+      if (!allowFlag){
+        if (globalIgnoredFilesAndDirs.some(entry => entry.test(files[i]))){
+          continue;
+        }
+      }
       allFiles.push(currentSubDirectory + files[i]);
+
     } else if (statSync.isDirectory()) {
       if (!allowFlag) {
-        if (globalIgnoredDirectories.includes(files[i])) {
+        if (globalIgnoredFilesAndDirs.includes(files[i])) {
           continue;
         }
       }
@@ -55,7 +63,7 @@ const main = function () {
 
   if (!allowFlag) {
     if (fs.existsSync(".gitignore")) {
-      globalIgnoredDirectories.push(
+      globalIgnoredFilesAndDirs.push(
         ...fs.readFileSync(".gitignore", "utf-8").split("\n")
       );
     }
@@ -66,7 +74,7 @@ const main = function () {
   } else {
     files = fs.readdirSync(dirPath);
     if (!allowFlag) {
-      files = files.filter((file) => !globalIgnoredDirectories.includes(file));
+      files = files.filter((file) => !globalIgnoredFilesAndDirs.includes(file));
     }
   }
 
