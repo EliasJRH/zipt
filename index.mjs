@@ -6,6 +6,11 @@ import fuzzy from "fuzzy";
 import CheckboxPlusPrompt from "inquirer-checkbox-plus-prompt";
 import chalk from "chalk";
 import fs from "fs";
+import { exit } from "process";
+
+const globalIgnoredDirectories = [".git"];
+let recursiveFlag = false;
+let allowFlag = false;
 
 const help = function () {
   const helpText = `tzip
@@ -16,17 +21,54 @@ usage:
   tzip <command>
 
   -h, --help: Diplays this help message
-  -r: Display individual files in nested subdirectories
+  -r: Display individual files in nested subdirectories (default off)
+  -a: Allow files in all directories, included hidden directories and those in .gitignore if one exists (default off)
   `;
 
   console.log(helpText);
 };
 
-const main = function () {
-  console.log(getNestedFiles())
-
-  let dirPath = process.cwd();
+const getNestedFiles = function (allFiles = [], currentSubDirectory = "") {
+  let dirPath =
+    process.cwd() + (currentSubDirectory ? "/" : "") + currentSubDirectory;
   let files = fs.readdirSync(dirPath);
+  for (let i = 0; i < files.length; ++i) {
+    let statSync = fs.lstatSync(currentSubDirectory + files[i]);
+    if (statSync.isFile()) {
+      allFiles.push(currentSubDirectory + files[i]);
+    } else if (statSync.isDirectory()) {
+      if (!allowFlag) {
+        if (globalIgnoredDirectories.includes(files[i])) {
+          continue;
+        }
+      }
+      allFiles = getNestedFiles(allFiles, currentSubDirectory + files[i] + "/");
+    }
+  }
+
+  return allFiles;
+};
+
+const main = function () {
+  let files;
+  let dirPath = process.cwd();
+
+  if (!allowFlag) {
+    if (fs.existsSync(".gitignore")) {
+      globalIgnoredDirectories.push(
+        ...fs.readFileSync(".gitignore", "utf-8").split("\n")
+      );
+    }
+  }
+
+  if (recursiveFlag) {
+    files = getNestedFiles();
+  } else {
+    files = fs.readdirSync(dirPath);
+    if (!allowFlag) {
+      files = files.filter((file) => !globalIgnoredDirectories.includes(file));
+    }
+  }
 
   const zipFormats = ["zip", "tar"];
 
@@ -137,8 +179,19 @@ const main = function () {
 
 const args = process.argv;
 
-if (process.argv.includes("-h") || process.argv.includes("--help")) {
-  help();
-} else {
-  main();
+for (let i = 2; i < process.argv.length; ++i) {
+  if (process.argv[i].includes("-")) {
+    for (let j = 0; j < process.argv[i].length; ++j) {
+      if (process.argv[i].charAt(j) === "h") {
+        help();
+        exit();
+      } else if (process.argv[i].charAt(j) === "r") {
+        recursiveFlag = true;
+      } else if (process.argv[i].charAt(j) === "a") {
+        allowFlag = true;
+      }
+    }
+  }
 }
+
+main();
