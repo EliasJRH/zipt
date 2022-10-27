@@ -1,8 +1,8 @@
-# tzip
-tzip (short for terminal zip) tzip is an interactive command line application for creating compressed archives
+# zipt
+zipt (short for terminal zip) zipt is an interactive command line application for creating compressed archives
 
 ```
-Usage: tzip [options]
+Usage: zipt [options]
 
 Options<br>
   -h, --help      Diplays this help message

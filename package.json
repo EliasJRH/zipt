@@ -1,6 +1,6 @@
 {
-  "name": "zipcmd",
-  "version": "1.0.0",
+  "name": "zipt",
+  "version": "0.1.0",
   "description": "An interactive command line file zip tool",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,10 @@
     "inquirer-checkbox-plus-prompt": "^1.0.1"
   },
   "bin": {
-    "tzip": "./index.mjs"
+    "zipt": "./index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-user/repo-url.git"
   }
 }
