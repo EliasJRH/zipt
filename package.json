@@ -1,6 +1,6 @@
 {
   "name": "zipt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An interactive command line file zip tool",
   "main": "index.js",
   "scripts": {
