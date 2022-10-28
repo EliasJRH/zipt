@@ -5,7 +5,7 @@ zipt (short for terminal zip) zipt is an interactive command line application fo
 Usage: zipt [options]
 
 Options<br>
-  -h, --help      Diplays this help message
+  -h, --help:     Diplays this help message
   -r:             Display individual files in nested subdirectories (default off)
   -a:             Allow files in all directories, included hidden directories and those in .gitignore if one exists (default off)
 ```
