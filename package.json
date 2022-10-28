@@ -1,6 +1,6 @@
 {
   "name": "zipt",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "An interactive command line file zip tool",
   "main": "index.js",
   "scripts": {
@@ -27,5 +27,7 @@
     "type": "git",
     "url": "https://github.com/EliasJRH/zipt.git"
   },
-  "files": ["index.mjs"]
+  "files": [
+    "index.mjs"
+  ]
 }
