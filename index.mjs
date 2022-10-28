@@ -156,10 +156,7 @@ const main = function () {
     // listen for all archive data to be written
     // 'close' event is fired only when a file descriptor is involved
     output.on("close", function () {
-      console.log(archive.pointer() + " total bytes");
-      console.log(
-        "archiver has been finalized and the output file descriptor has closed."
-      );
+      console.log(`Added ${items.length} item(s) (${archive.pointer()} total bytes) to ${zipName}.${zipFormat}`);
     });
 
     // This event is fired when the data source is drained no matter what was the data source.
