@@ -9,7 +9,8 @@
   "keywords": [
     "Files",
     "Compression",
-    "CLI"
+    "CLI",
+    "TUI"
   ],
   "author": "Elias H",
   "license": "ISC",
